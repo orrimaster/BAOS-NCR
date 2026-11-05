@@ -1,0 +1,17 @@
+{
+  "name": "BAOS 판재 절단 계산기",
+  "short_name": "BAOS 절단",
+  "description": "원자재 분할 시 생산 수량과 다음 공정 사용 가능 마진을 계산합니다.",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF9F6",
+  "theme_color": "#B5172B",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

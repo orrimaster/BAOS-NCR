@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#B5172B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="BAOS 절단">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>BAOS 판재 절단 계산기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: 소형 한 화면 — 상단 CI 헤더(언어 탭) · 좌측 입력 · 우측 결과 + 배치도 */
+/* BAOS CI: ① 레드(M100Y85→C15M100Y90K20) ② 오렌지(M60Y100→M70Y95) ③ 웜그레이(C25M25Y40K30→C22M25Y40K10) ④ 버건디(M60Y20K90) */
+:root{
+  --ci1a:#E61E3C; --ci1b:#B5172B; --ci2a:#F5921E; --ci2b:#F07B27; --ci3a:#8E8571; --ci3b:#B3A68E; --ci4:#44111A;
+  --brand:#B5172B; --brand-ink:#ffffff; --accent:#F07B27;
+  --bg:#FBF9F6; --panel:#FFFFFF; --fg:#3A2A2C; --muted:#857B6E; --line:#E9E2D7; --field:#FDFCFA; --ph:#C9BEAD;
+  --sheet:#FFFFFF; --border-area:#EFE9DF; --cell:#F6F1E8; --hatch:#DDD1BD; --prod:#44111A; --dim:#E61E3C; --cut:#F07B27;
+  --ok:#1E8A50; --ok-bg:#E6F5EC; --bad:#D0193A; --bad-bg:#FCE6E9;
+  /* 영문·숫자: Times New Roman / 한글: 맑은 고딕 */
+  --font:"Times New Roman",Times,"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:12.6px;line-height:1.35}
+.wrap{height:100%;margin:0 auto;padding-block:6px;padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:6px}
+header{position:relative;display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:14px 12px 10px;overflow:hidden;flex:none;flex-wrap:wrap}
+header::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--ci1a) 0 25%,var(--ci2a) 25% 50%,var(--ci3b) 50% 75%,var(--ci4) 75% 100%)}
+.logo img{height:36px;width:auto;display:block}
+.ttl{min-width:0}
+header h1{margin:0;font-size:16.6px;font-weight:700;color:var(--ci4);white-space:nowrap}
+.meta{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.meta b{color:var(--fg);font-weight:600}
+.lang{margin-left:auto;display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.lang button{border:0;border-right:1px solid var(--line);border-radius:0;padding:3px 9px;font:700 11.5px var(--font);background:var(--field);color:var(--muted);cursor:pointer}
+.lang button:last-child{border-right:0}
+.lang button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
+.main{flex:1;min-height:0;display:grid;grid-template-columns:262px minmax(0,1fr);gap:6px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:7px 9px;min-width:0}
+.panel h2{margin:0 0 4px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--brand)}
+form.panel{overflow:auto;display:flex;flex-direction:column;gap:9px}
+.grid{display:grid;grid-template-columns:62px minmax(0,1fr) minmax(0,1fr);gap:3px 4px;align-items:center}
+.grid .hd{font-size:10.5px;color:var(--muted);text-align:center}
+.grid .lb{font-size:11.5px;font-weight:700;line-height:1.15}
+.grid .span2{grid-column:2/4}
+.grid .lb .sub{font-size:9.6px;font-weight:400;color:var(--muted)}
+.row4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
+.f{display:flex;flex-direction:column;gap:0;font-size:10.5px;color:var(--muted);min-width:0;text-align:center}
+.blk .lb{font-size:11.5px;font-weight:700;margin-bottom:1px}
+input.n{width:100%;font:600 13.7px var(--font);font-variant-numeric:tabular-nums;color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:3px;padding:2px 6px;height:25px;text-align:right}
+input.n::placeholder{color:var(--ph);font-weight:400}
+input.n:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent);background:#fff}
+.seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg label{flex:1;text-align:center;font-size:11.5px;padding:3px 2px;cursor:pointer;border-right:1px solid var(--line);color:var(--muted);background:var(--field);white-space:nowrap}
+.seg label:last-child{border-right:0}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--brand);color:var(--brand-ink);font-weight:700}
+.seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:-2px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.cmp:empty{display:none}
+.cmp .ch{grid-column:1/-1;font-size:10.5px;color:var(--muted)}
+.cc{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:3px 6px;border:1px solid var(--line);background:var(--field);border-radius:3px;cursor:pointer;font-family:var(--font);color:var(--fg)}
+.cc .cl{font-size:10.5px;color:var(--muted);font-weight:700}
+.cc .cn{font-size:15.8px;font-weight:700;line-height:1.2}
+.cc .cd{font-size:10.5px;color:var(--muted)}
+.cc.sel{border-color:var(--brand);background:#FFF5F6;box-shadow:inset 3px 0 0 var(--brand)}
+.cc.sel .cl{color:var(--brand)}
+.cc.no .cn,.cc.no .cd{color:var(--bad)}
+.btns{display:flex;gap:4px;margin-top:auto;padding-top:2px}
+.btn{font:700 11.5px var(--font);border-radius:3px;padding:3px 10px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
+.btn:hover,.cc:hover{border-color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.right{display:flex;flex-direction:column;gap:6px;min-width:0;min-height:0}
+.summary{flex:none}
+.count{background:linear-gradient(90deg,var(--ci1a),var(--ci1b));color:var(--brand-ink);border-radius:4px;padding:6px 10px;display:grid;grid-template-columns:1fr auto;grid-template-areas:"k k" "v d";align-items:end;gap:0 8px}
+.count .k{grid-area:k} .count .v{grid-area:v} .count .d{grid-area:d;padding-bottom:3px}
+.count .k{font-size:11px;opacity:.92;line-height:1.2}
+.count .v{font-size:29.8px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.count .v small{font-size:13.7px;margin-left:3px}
+.count .d{font-size:12.1px;font-weight:700}
+.reshead{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px}
+.status{display:inline-flex;align-items:center;gap:4px;font-weight:700;font-size:11px;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.status.ok{color:var(--ok);background:var(--ok-bg)} .status.bad{color:var(--bad);background:var(--bad-bg)} .status.idle{color:var(--muted);background:var(--border-area)}
+.status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+table.res{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.res th,table.res td{padding:2px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.res th:first-child,table.res td:first-child{text-align:left;white-space:normal}
+table.res thead th{font-size:10.5px;color:var(--muted);font-weight:600}
+table.res td{font-size:13.7px;font-weight:700}
+table.res td:first-child{font-size:11.5px;font-weight:400}
+table.res tr.key td{color:var(--brand);font-size:15.8px}
+table.res tr.key td:first-child{font-size:11.5px;font-weight:700}
+table.res td small{font-size:10px;color:var(--muted);font-weight:400}
+.neg{color:var(--bad)!important}
+.note{font-size:11px;color:var(--muted);margin:3px 0 0;line-height:1.3}
+.drawpanel{flex:1;min-height:0;display:flex;flex-direction:column}
+.draw{flex:1;min-height:0;position:relative}
+.draw svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.draw .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:12.1px;border:1px dashed var(--line);border-radius:4px;padding:10px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:2px}
+.legend i{display:inline-block;width:12px;height:8px;vertical-align:-1px;margin-right:3px;border:1px solid var(--muted)}
+.dsub{font-size:11px;color:var(--muted)}
+/* 휴대폰 (세로 화면): 입력 → 생산 수 → 결과 → 배치도 순서로 아래로 스크롤 */
+@media (max-width:640px){
+  html,body,.wrap{height:auto}
+  body{font-size:14px;-webkit-text-size-adjust:100%}
+  .wrap{gap:10px;padding-block:calc(env(safe-area-inset-top,0px) + 8px) calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+  header{padding:12px 12px 10px;gap:8px 10px}
+  .logo img{height:28px}
+  header h1{font-size:18px}
+  .meta{font-size:11px;white-space:normal}
+  .lang{margin-left:0;width:100%}
+  .lang button{flex:1;padding:8px 4px;font-size:13px}
+  .main{grid-template-columns:minmax(0,1fr);gap:10px}
+  .panel{padding:12px}
+  .panel h2{font-size:13px}
+  form.panel{overflow:visible;gap:12px}
+  .grid{grid-template-columns:70px minmax(0,1fr) minmax(0,1fr);gap:6px}
+  .grid .lb,.blk .lb{font-size:14px}
+  .grid .hd,.f{font-size:12px}
+  .row4{gap:6px}
+  input.n{font-size:16px;height:40px;padding:4px 8px}
+  .seg label{font-size:14px;padding:9px 2px}
+  .count{padding:10px 14px}
+  .count .k{font-size:13px} .count .v{font-size:40px} .count .d{font-size:15px}
+  .cmp .ch{font-size:12px}
+  .cc{padding:8px 10px} .cc .cl{font-size:12px} .cc .cn{font-size:18px} .cc .cd{font-size:12px}
+  .btns{margin-top:0} .btn{font-size:14px;padding:9px 16px}
+  #btnPrint{display:none}
+  .summary .panel{padding:12px}
+  table.res th,table.res td{padding:6px 4px}
+  table.res td{font-size:15px} table.res td:first-child{font-size:13px}
+  table.res tr.key td{font-size:17px} table.res tr.key td:first-child{font-size:13px}
+  table.res td small{font-size:11px}
+  .note{font-size:12.5px}
+  .reshead{flex-wrap:wrap}
+  .dsub{font-size:12px}
+  .draw{flex:none;aspect-ratio:1/1;max-width:100%}
+  .legend{font-size:12px}
+}
+@media print{html,body,.wrap{height:auto} .no-print{display:none!important} .draw{flex:none;height:380px}}
+@media (prefers-reduced-motion:no-preference){.btn,.seg label,.cc{transition:background .15s,border-color .15s}}
+</style>
+</head><body>
+
+<div class="wrap">
+  <header>
+    <div class="logo"><img alt="BAOS" src="data:image/jpeg;base64,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"></div>
+    <div class="ttl">
+      <h1 data-i18n="title">판재 절단 계산기</h1>
+      <div class="meta"><span data-i18n="ver">버전</span> <b id="mVer"></b> · <span data-i18n="date">제작일</span> <b id="mDate"></b> · <span data-i18n="author">제작자</span> <b id="mAuthor"></b></div>
+    </div>
+    <div class="lang no-print" role="group" aria-label="Language">
+      <button type="button" data-lang="ko" aria-pressed="true">한국어</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+      <button type="button" data-lang="vi" aria-pressed="false">Tiếng Việt</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <form class="panel" id="form" autocomplete="off">
+      <h2 data-i18n="inputs">입력 파라메터</h2>
+      <div class="grid">
+        <span></span><span class="hd">X</span><span class="hd">Y</span>
+        <span class="lb" data-i18n="raw">원자재</span>
+        <input class="n" id="rawX" inputmode="decimal" enterkeyhint="next" placeholder="mm" aria-label="raw X">
+        <input class="n" id="rawY" inputmode="decimal" enterkeyhint="next" placeholder="mm" aria-label="raw Y">
+        <span class="lb" data-i18n="prd">완제품</span>
+        <input class="n" id="prdX" inputmode="decimal" enterkeyhint="next" placeholder="mm" aria-label="product X">
+        <input class="n" id="prdY" inputmode="decimal" enterkeyhint="next" placeholder="mm" aria-label="product Y">
+        <span class="lb"><span data-i18n="cut">절단 폭</span><br><small class="sub" data-i18n="cutSub">X·Y 공통</small></span>
+        <input class="n span2" id="cut" inputmode="decimal" enterkeyhint="next" placeholder="0" aria-label="cut width X,Y">
+      </div>
+      <div class="blk">
+        <div class="lb" data-i18n="border">테두리 마진 (mm)</div>
+        <div class="row4">
+          <label class="f"><span data-i18n="top">상</span><input class="n" id="bT" inputmode="decimal" enterkeyhint="next" placeholder="0"></label>
+          <label class="f"><span data-i18n="bottom">하</span><input class="n" id="bB" inputmode="decimal" enterkeyhint="next" placeholder="0"></label>
+          <label class="f"><span data-i18n="left">좌</span><input class="n" id="bL" inputmode="decimal" enterkeyhint="next" placeholder="0"></label>
+          <label class="f"><span data-i18n="right">우</span><input class="n" id="bR" inputmode="decimal" enterkeyhint="next" placeholder="0"></label>
+        </div>
+      </div>
+      <div class="blk">
+        <div class="lb" data-i18n="ori">배치 방향</div>
+        <div class="seg" role="radiogroup">
+          <label><input type="radio" name="ori" id="oriAuto" value="auto" checked><span data-i18n="auto">자동</span></label>
+          <label><input type="radio" name="ori" id="oriN" value="n"><span data-i18n="normal">정방향</span></label>
+          <label><input type="radio" name="ori" id="oriR" value="r"><span data-i18n="rot">90° 회전</span></label>
+        </div>
+      </div>
+      <div class="count">
+        <div class="k" data-i18n="count">생산 가능 제품 수</div>
+        <div class="v" id="oCount">-</div>
+        <div class="d" id="oGrid">X - × Y -</div>
+      </div>
+      <div class="cmp" id="cmp" aria-live="polite"></div>
+      <div class="btns no-print">
+        <button type="button" class="btn" id="btnReset" data-i18n="reset">초기화</button>
+        <button type="button" class="btn" id="btnPrint" data-i18n="print">인쇄</button>
+      </div>
+    </form>
+
+    <div class="right">
+      <div class="summary">
+        <div class="panel">
+          <div class="reshead"><h2 style="margin:0" data-i18n="outputs">출력 파라메터</h2><span class="status idle" id="oStatus"></span></div>
+          <table class="res">
+            <thead><tr><th></th><th>X</th><th>Y</th></tr></thead>
+            <tbody>
+              <tr class="key"><td><span data-i18n="mAvail">다음 공정 사용 가능 마진</span><br><small data-i18n="mAvailSub">제품 1개당 합계</small></td><td id="oMx">-</td><td id="oMy">-</td></tr>
+              <tr><td data-i18n="mHalf">한쪽당 마진 (양쪽 균등)</td><td id="oHx">-</td><td id="oHy">-</td></tr>
+              <tr><td data-i18n="pieces">배치 개수</td><td id="oNx">-</td><td id="oNy">-</td></tr>
+              <tr><td data-i18n="cutSize">절단 치수 (제품 + 마진)</td><td id="oSx">-</td><td id="oSy">-</td></tr>
+            </tbody>
+          </table>
+          <p class="note" id="oNote"></p>
+        </div>
+      </div>
+
+      <div class="panel drawpanel">
+        <div class="reshead"><h2 style="margin:0" data-i18n="layout">분할 형태</h2><span class="dsub" id="oOri"></span></div>
+        <div class="draw" id="draw"></div>
+        <div class="legend">
+          <span><i style="background:var(--cell);border-color:var(--prod)"></i><span data-i18n="lgCut">절단 치수 (제품 + 마진)</span></span>
+          <span><i style="border:1px dashed var(--prod);background:transparent"></i><span data-i18n="lgPrd">완제품 외곽</span></span>
+          <span><i style="background:var(--border-area)"></i><span data-i18n="lgEdge">테두리 마진 · 잔여</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 프로그램 정보 (여기만 고치면 표시가 바뀝니다) =====
+const APP_VERSION = "v1.4.0";
+const APP_DATE    = "2026-11-05";
+const APP_AUTHOR  = "Kwag.DS";
+const WIN_W = 936, WIN_H = 720;
+// 기본값 (빈칸 "" = 0으로 계산)
+const DEFAULTS = {rawX:3597, rawY:3297, prdX:1000, prdY:1000, cut:3, bT:3, bB:"", bL:3, bR:""};   // 프로그램 창 크기 (px)
+// ===========================================================
+
+const I18N = {
+  ko:{title:"판재 절단 계산기",ver:"버전",date:"제작일",author:"제작자",inputs:"입력 파라메터",raw:"원자재",prd:"완제품",cut:"절단 폭",
+    border:"테두리 마진 (mm)",top:"상",bottom:"하",left:"좌",right:"우",ori:"배치 방향",cutSub:"X·Y 공통",auto:"자동",normal:"정방향",rot:"90° 회전",
+    reset:"초기화",print:"인쇄",count:"생산 가능 제품 수",pcs:"개",outputs:"출력 파라메터",mAvail:"다음 공정 사용 가능 마진",mAvailSub:"제품 1개당 합계",
+    mHalf:"한쪽당 마진 (양쪽 균등)",pieces:"배치 개수",cutSize:"절단 치수 (제품 + 마진)",layout:"분할 형태",
+    lgCut:"절단 치수 (제품 + 마진)",lgPrd:"완제품 외곽",lgEdge:"테두리 마진 · 잔여",
+    stOk:"가공 가능",stBad:"원자재 부족",stIdle:"입력 대기",
+    noteOk:"다음 공정에서 제품 1개당 X {x}, Y {y} 까지 마진을 사용할 수 있습니다.",
+    noteBad:"원자재가 {s} 부족합니다. 테두리 마진을 줄이거나 배치 방향을 바꿔 보세요.",
+    noteIdle:"원자재와 완제품 치수를 입력하면 바로 계산됩니다. 절단 폭과 테두리 마진은 비워 두면 0입니다.",
+    cmpAuto:"자동 선택 근거",cmpMan:"배치 비교",applied:"적용",na:"불가",short:"{s} 부족",margin:"마진",
+    oriN:"정방향 배치",oriR:"90° 회전 배치",sheet:"원자재",product:"제품",empty:"원자재와 완제품 치수를 입력하면 분할 형태가 그려집니다.",
+    maxCells:"{n}개까지만 표시"},
+  en:{title:"Sheet Cutting Calculator",ver:"Version",date:"Date",author:"Author",inputs:"Inputs",raw:"Sheet",prd:"Product",cut:"Cut width",
+    border:"Edge margin (mm)",top:"Top",bottom:"Bottom",left:"Left",right:"Right",ori:"Orientation",cutSub:"X·Y same",auto:"Auto",normal:"Normal",rot:"Rotate 90°",
+    reset:"Reset",print:"Print",count:"Products per sheet",pcs:"pcs",outputs:"Results",mAvail:"Margin for next process",mAvailSub:"total per product",
+    mHalf:"Per side (split evenly)",pieces:"Pieces",cutSize:"Cut size (product + margin)",layout:"Cutting layout",
+    lgCut:"Cut size (product + margin)",lgPrd:"Product outline",lgEdge:"Edge margin · offcut",
+    stOk:"OK",stBad:"Sheet too small",stIdle:"Waiting for input",
+    noteOk:"In the next process each product can take up to X {x} and Y {y} of margin.",
+    noteBad:"The sheet is {s} short. Reduce the edge margin or change the orientation.",
+    noteIdle:"Enter the sheet and product sizes to calculate. A blank cut width or edge margin counts as 0.",
+    cmpAuto:"Why Auto chose this",cmpMan:"Layout comparison",applied:"applied",na:"Does not fit",short:"{s} short",margin:"Margin",
+    oriN:"Normal layout",oriR:"Rotated 90°",sheet:"Sheet",product:"Product",empty:"The cutting layout appears once the sheet and product sizes are entered.",
+    maxCells:"Showing first {n} only"},
+  vi:{title:"Máy tính cắt tấm",ver:"Phiên bản",date:"Ngày tạo",author:"Người tạo",inputs:"Thông số đầu vào",raw:"Phôi tấm",prd:"Sản phẩm",cut:"Bề rộng cắt",
+    border:"Biên mép (mm)",top:"Trên",bottom:"Dưới",left:"Trái",right:"Phải",ori:"Hướng xếp",cutSub:"X·Y chung",auto:"Tự động",normal:"Chuẩn",rot:"Xoay 90°",
+    reset:"Đặt lại",print:"In",count:"Số sản phẩm mỗi tấm",pcs:"cái",outputs:"Kết quả",mAvail:"Dung sai cho công đoạn sau",mAvailSub:"tổng mỗi sản phẩm",
+    mHalf:"Mỗi bên (chia đều)",pieces:"Số lượng xếp",cutSize:"Kích thước cắt (SP + dung sai)",layout:"Sơ đồ cắt",
+    lgCut:"Kích thước cắt (SP + dung sai)",lgPrd:"Đường bao sản phẩm",lgEdge:"Biên mép · phần dư",
+    stOk:"Gia công được",stBad:"Thiếu phôi",stIdle:"Chờ nhập",
+    noteOk:"Ở công đoạn sau, mỗi sản phẩm có thể dùng dung sai tối đa X {x}, Y {y}.",
+    noteBad:"Phôi thiếu {s}. Hãy giảm biên mép hoặc đổi hướng xếp.",
+    noteIdle:"Nhập kích thước phôi và sản phẩm để tính. Bề rộng cắt và biên mép để trống được tính là 0.",
+    cmpAuto:"Cơ sở chọn tự động",cmpMan:"So sánh bố trí",applied:"áp dụng",na:"Không xếp được",short:"thiếu {s}",margin:"Dung sai",
+    oriN:"Bố trí chuẩn",oriR:"Xoay 90°",sheet:"Phôi",product:"SP",empty:"Sơ đồ cắt sẽ hiện khi nhập kích thước phôi và sản phẩm.",
+    maxCells:"Chỉ hiển thị {n} ô đầu"}
+};
+let lang = "ko";
+try { const l = localStorage.getItem("baos-cut-lang"); if (I18N[l]) lang = l; } catch(e){}
+const t = (k, p={}) => (I18N[lang][k] ?? I18N.ko[k]).replace(/\{(\w+)\}/g, (_, n) => p[n]);
+
+const $ = id => document.getElementById(id);
+const IDS = ["rawX","rawY","prdX","prdY","cut","bT","bB","bL","bR"];
+
+$("mVer").textContent = APP_VERSION; $("mDate").textContent = APP_DATE; $("mAuthor").textContent = APP_AUTHOR;
+
+// 숫자 (천단위 구분기호)
+const parse = s => { const v = parseFloat(String(s).replace(/,/g, "").trim()); return isFinite(v) ? v : NaN; };
+const num = id => { const v = parse($(id).value); return isFinite(v) ? v : 0; };
+const r6 = v => Math.round(v*1e6)/1e6;
+const fmt = v => isFinite(v) ? (Math.round(v*100)/100).toLocaleString("en-US", {maximumFractionDigits:2}) : "-";
+const mm = v => fmt(v) + " mm";
+const floor1 = v => Math.floor(r6(v)*10)/10;
+
+function axis(raw, prd, cut, b1, b2){
+  const avail = raw - b1 - b2;
+  let n = (prd + cut) > 0 ? Math.floor(r6((avail + cut)/(prd + cut))) : 0;
+  if (n < 1) n = 1;
+  const rem = r6(avail - n*prd - (n-1)*cut);
+  const m = rem / n;
+  return {n, rem, m, mShow: floor1(m)};
+}
+function layout(px, py, p){
+  const ax = axis(p.rawX, px, p.cut, p.bL, p.bR);
+  const ay = axis(p.rawY, py, p.cut, p.bT, p.bB);
+  return {px, py, ax, ay, count: ax.n*ay.n, minM: Math.min(ax.m, ay.m)};
+}
+function short(L){
+  const a = []; if (L.ax.m < 0) a.push(`X ${mm(-L.ax.rem)}`); if (L.ay.m < 0) a.push(`Y ${mm(-L.ay.rem)}`);
+  return a.join(", ");
+}
+function read(){
+  const p = {}; IDS.forEach(k => p[k] = num(k));
+  p.ori = document.querySelector("input[name=ori]:checked").value;
+  return p;
+}
+function calc(p){
+  const N = layout(p.prdX, p.prdY, p), R = layout(p.prdY, p.prdX, p);
+  let L, rot;
+  if (p.ori === "n") { L = N; rot = false; }
+  else if (p.ori === "r") { L = R; rot = true; }
+  else {
+    // 자동: 원자재 안에 들어가는 배치 우선 → 수량 많은 쪽 → 마진 넉넉한 쪽 → 정방향
+    const fN = N.minM >= 0, fR = R.minM >= 0;
+    const better = (fR && !fN) || (fR === fN && (R.count > N.count || (R.count === N.count && R.minM > N.minM + 1e-9)));
+    L = better ? R : N; rot = better;
+  }
+  return {L, rot, N, R};
+}
+
+const OUT = ["oMx","oMy","oHx","oHy","oNx","oNy","oSx","oSy"];
+function clearOut(){
+  $("oCount").innerHTML = `-<small>${t("pcs")}</small>`; $("oGrid").textContent = "X - × Y -";
+  OUT.forEach(id => { $(id).textContent = "-"; $(id).classList.remove("neg"); });
+  $("oStatus").className = "status idle"; $("oStatus").textContent = t("stIdle");
+  $("oNote").textContent = t("noteIdle"); $("oOri").textContent = "";
+  $("cmp").innerHTML = ""; $("cmp").dataset.h = "";
+  $("draw").innerHTML = `<div class="empty">${t("empty")}</div>`;
+}
+
+function render(){
+  const p = read();
+  if (!(p.rawX>0 && p.rawY>0 && p.prdX>0 && p.prdY>0)) { clearOut(); return; }
+  const {L, rot, N, R} = calc(p), {ax, ay} = L;
+  const bad = ax.m < 0 || ay.m < 0;
+
+  $("oCount").innerHTML = `${fmt(L.count)}<small>${t("pcs")}</small>`;
+  $("oGrid").textContent = `X ${fmt(ax.n)} × Y ${fmt(ay.n)}`;
+  const setV = (id, txt, neg) => { $(id).textContent = txt; $(id).classList.toggle("neg", !!neg); };
+  setV("oMx", mm(ax.mShow), ax.m < 0); setV("oMy", mm(ay.mShow), ay.m < 0);
+  setV("oHx", mm(floor1(ax.m/2)), ax.m < 0); setV("oHy", mm(floor1(ay.m/2)), ay.m < 0);
+  setV("oNx", fmt(ax.n)); setV("oNy", fmt(ay.n));
+  setV("oSx", mm(L.px + ax.mShow), ax.m < 0); setV("oSy", mm(L.py + ay.mShow), ay.m < 0);
+
+  const st = $("oStatus");
+  if (bad){ st.className = "status bad"; st.textContent = t("stBad"); $("oNote").textContent = t("noteBad", {s: short(L)}); }
+  else { st.className = "status ok"; st.textContent = t("stOk"); $("oNote").textContent = t("noteOk", {x: mm(ax.mShow), y: mm(ay.mShow)}); }
+  $("oOri").textContent = `${rot ? t("oriR") : t("oriN")} · ${t("sheet")} ${fmt(p.rawX)} × ${fmt(p.rawY)} mm`;
+
+  const card = (key, lay, label) => {
+    const ok = lay.ax.m >= 0 && lay.ay.m >= 0, sel = (key === "r") === rot;
+    const detail = ok ? `X ${fmt(lay.ax.mShow)} · Y ${fmt(lay.ay.mShow)} mm` : t("short", {s: short(lay)});
+    return `<button type="button" class="cc${sel ? " sel" : ""}${ok ? "" : " no"}" data-ori="${key}">
+      <span class="cl">${label}${sel ? " · " + t("applied") : ""}</span><span class="cn">${ok ? fmt(lay.count) + " " + t("pcs") : t("na")}</span><span class="cd">${detail}</span></button>`;
+  };
+  const h = `<div class="ch">${p.ori === "auto" ? t("cmpAuto") : t("cmpMan")}</div>` + card("n", N, t("normal")) + card("r", R, t("rot"));
+  if ($("cmp").dataset.h !== h){ $("cmp").innerHTML = h; $("cmp").dataset.h = h; }
+
+  draw(p, L);
+}
+
+function draw(p, L){
+  const W = p.rawX, H = p.rawY, {ax, ay} = L;
+  const cw = L.px + ax.m, ch = L.py + ay.m;
+  const M = Math.max(W, H), box = $("draw").getBoundingClientRect();
+  // 도면 글자를 화면 기준 약 12px로 유지
+  const upp = (box.width > 0 && box.height > 0) ? Math.max(W/(box.width*0.82), H/(box.height*0.78)) : M/400;
+  const fs = 12.5 * upp, pad = fs * 3.4;
+  const vx = -pad, vy = -pad, vw = W + pad*1.8, vh = H + pad*1.9;
+  const hs = M/60, total = ax.n * ay.n, maxCells = 3000;
+  let s = `<svg viewBox="${vx} ${vy} ${vw} ${vh}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("layout")}">
+  <defs><pattern id="hatch" width="${hs}" height="${hs}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="${hs}" height="${hs}" fill="var(--cell)"/><line x1="0" y1="0" x2="0" y2="${hs}" stroke="var(--hatch)" stroke-width="1" vector-effect="non-scaling-stroke"/></pattern></defs>
+  <style>text{font-family:var(--font);fill:var(--muted)} .ns{vector-effect:non-scaling-stroke}</style>
+  <rect x="0" y="0" width="${W}" height="${H}" fill="var(--border-area)" stroke="var(--fg)" stroke-width="1.5" class="ns"/>`;
+  const uw = W - p.bL - p.bR, uh = H - p.bT - p.bB;
+  if (uw > 0 && uh > 0) s += `<rect x="${p.bL}" y="${p.bT}" width="${uw}" height="${uh}" fill="var(--sheet)" stroke="var(--muted)" stroke-dasharray="4 3" stroke-width="1" class="ns"/>`;
+  const bad = ax.m < 0 || ay.m < 0;
+  const showLabel = cw > fs*3.2 && ch > fs*2.6 && total <= 200;
+  let k = 0;
+  for (let j=0; j<ay.n && k<maxCells; j++) for (let i=0; i<ax.n && k<maxCells; i++, k++){
+    const x = p.bL + i*(cw + p.cut), y = p.bT + j*(ch + p.cut);
+    s += `<rect x="${x}" y="${y}" width="${cw}" height="${ch}" fill="url(#hatch)" stroke="${bad ? "var(--bad)" : "var(--prod)"}" stroke-width="1.2" class="ns"/>`;
+    const ox = x + Math.max(0, ax.m)/2, oy = y + Math.max(0, ay.m)/2;
+    if (ax.m > 0 || ay.m > 0) s += `<rect x="${ox}" y="${oy}" width="${L.px}" height="${L.py}" fill="none" stroke="var(--prod)" stroke-dasharray="5 3" stroke-width="1" class="ns"/>`;
+    if (showLabel){
+      s += `<text x="${x+cw/2}" y="${y+ch/2}" text-anchor="middle" font-size="${fs*1.05}" style="fill:var(--fg);font-weight:700">${t("product")}</text>`;
+      s += `<text x="${x+cw/2}" y="${y+ch/2+fs*1.2}" text-anchor="middle" font-size="${fs*0.8}">${fmt(L.px)} × ${fmt(L.py)}</text>`;
+    }
+  }
+  const tick = fs*0.45;
+  const dimH = (x1,x2,y,label,col) => `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width="1" class="ns"/>
+    <line x1="${x1-tick}" y1="${y+tick}" x2="${x1+tick}" y2="${y-tick}" stroke="${col}" stroke-width="1.4" class="ns"/>
+    <line x1="${x2-tick}" y1="${y+tick}" x2="${x2+tick}" y2="${y-tick}" stroke="${col}" stroke-width="1.4" class="ns"/>
+    <text x="${(x1+x2)/2}" y="${y-fs*0.4}" text-anchor="middle" font-size="${fs}" style="fill:${col}">${label}</text>`;
+  const dimV = (y1,y2,x,label,col,side=-1) => { const tx = side<0 ? x-fs*0.4 : x+fs*1.2; return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${col}" stroke-width="1" class="ns"/>
+    <line x1="${x-tick}" y1="${y1+tick}" x2="${x+tick}" y2="${y1-tick}" stroke="${col}" stroke-width="1.4" class="ns"/>
+    <line x1="${x-tick}" y1="${y2+tick}" x2="${x+tick}" y2="${y2-tick}" stroke="${col}" stroke-width="1.4" class="ns"/>
+    <text x="${tx}" y="${(y1+y2)/2}" text-anchor="middle" font-size="${fs}" transform="rotate(-90 ${tx} ${(y1+y2)/2})" style="fill:${col}">${label}</text>`; };
+  s += dimH(0, W, H + pad*0.75, `${t("sheet")} X ${fmt(W)}`, "var(--dim)");
+  s += dimV(0, H, -pad*0.55, `${t("sheet")} Y ${fmt(H)}`, "var(--dim)");
+  s += dimH(p.bL, p.bL + cw, -pad*0.35, fmt(L.px + ax.mShow), "var(--cut)");
+  s += dimV(p.bT, p.bT + ch, W + pad*0.3, fmt(L.py + ay.mShow), "var(--cut)", 1);
+  if (total > maxCells) s += `<text x="${W/2}" y="${H/2}" text-anchor="middle" font-size="${fs*1.4}" style="fill:var(--fg)">${t("maxCells", {n: fmt(maxCells)})}</text>`;
+  $("draw").innerHTML = s + `</svg>`;
+}
+
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
+  document.title = "BAOS · " + t("title");
+  $("cmp").dataset.h = "";
+  render();
+}
+
+// 입력: 천단위 구분기호는 칸을 벗어날 때 표시
+const inputs = IDS.map($);
+inputs.forEach((el, i) => {
+  el.addEventListener("input", () => { el.value = el.value.replace(/[^\d.,\-]/g, ""); render(); });
+  el.addEventListener("blur", () => { const v = parse(el.value); el.value = isFinite(v) ? v.toLocaleString("en-US", {maximumFractionDigits:3}) : ""; });
+  el.addEventListener("focus", () => { el.value = el.value.replace(/,/g, ""); el.select(); });
+  el.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); (inputs[i+1] || inputs[0]).focus(); } });
+});
+document.querySelectorAll("input[name=ori]").forEach(r => r.addEventListener("change", render));
+window.addEventListener("resize", () => { clearTimeout(window._rz); window._rz = setTimeout(render, 80); });
+$("form").addEventListener("submit", e => e.preventDefault());
+$("cmp").addEventListener("click", e => {
+  const b = e.target.closest("[data-ori]"); if (!b) return;
+  document.querySelector(`input[name=ori][value="${b.dataset.ori}"]`).checked = true; render();
+});
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => {
+  lang = b.dataset.lang; try { localStorage.setItem("baos-cut-lang", lang); } catch(e){} applyLang();
+}));
+$("btnReset").addEventListener("click", () => {
+  setDefaults(); $("oriAuto").checked = true; render(); $("rawX").focus();
+});
+if (window.self !== window.top) $("btnPrint").hidden = true;
+$("btnPrint").addEventListener("click", () => window.print());
+function setDefaults(){
+  IDS.forEach(k => { const v = DEFAULTS[k]; $(k).value = (v === "" || v == null) ? "" : Number(v).toLocaleString("en-US", {maximumFractionDigits:3}); });
+}
+setDefaults();
+applyLang();
+// 웹 앱(홈 화면 설치)일 때 오프라인 캐시 등록
+if ("serviceWorker" in navigator && location.protocol === "https:" && document.querySelector('link[rel="manifest"]')){
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+// 단독 실행(EXE) 시 창 크기 고정 + 화면 가운데 배치
+if (window.self === window.top && location.protocol === "file:"){
+  try {
+    window.resizeTo(WIN_W, WIN_H);
+    window.moveTo(Math.max(0, (screen.availWidth - WIN_W)/2), Math.max(0, (screen.availHeight - WIN_H)/2));
+  } catch(e){}
+}
+</script>
+
+</body></html>
