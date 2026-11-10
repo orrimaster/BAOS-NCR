@@ -18,12 +18,14 @@
   --brand:#B5172B; --brand-ink:#ffffff; --accent:#F07B27;
   --bg:#FBF9F6; --panel:#FFFFFF; --fg:#3A2A2C; --muted:#857B6E; --line:#E9E2D7; --field:#FDFCFA; --ph:#C9BEAD;
   --sheet:#FFFFFF; --border-area:#EFE9DF; --cell:#F6F1E8; --hatch:#DDD1BD; --prod:#44111A; --dim:#E61E3C; --cut:#F07B27;
+  --kerf:#E61E3C; --remain:#DDF0FB; --remain-line:#8CC4E6; --remain-ink:#2F78A8; --warn:#B45A00; --warn-bg:#FDF0DF;
   --ok:#1E8A50; --ok-bg:#E6F5EC; --bad:#D0193A; --bad-bg:#FCE6E9;
   /* 영문·숫자: Times New Roman / 한글: 맑은 고딕 */
   --font:"Times New Roman",Times,"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",serif;
   color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:12.6px;line-height:1.35}
 .wrap{height:100%;margin:0 auto;padding-block:6px;padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:6px}
@@ -38,11 +40,11 @@ header h1{margin:0;font-size:16.6px;font-weight:700;color:var(--ci4);white-space
 .lang button{border:0;border-right:1px solid var(--line);border-radius:0;padding:3px 9px;font:700 11.5px var(--font);background:var(--field);color:var(--muted);cursor:pointer}
 .lang button:last-child{border-right:0}
 .lang button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
-.main{flex:1;min-height:0;display:grid;grid-template-columns:262px minmax(0,1fr);gap:6px}
+.main{flex:1;min-height:0;display:grid;grid-template-columns:282px minmax(0,1fr);gap:6px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:7px 9px;min-width:0}
 .panel h2{margin:0 0 4px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--brand)}
 form.panel{overflow:auto;display:flex;flex-direction:column;gap:9px}
-.grid{display:grid;grid-template-columns:62px minmax(0,1fr) minmax(0,1fr);gap:3px 4px;align-items:center}
+.grid{display:grid;grid-template-columns:78px minmax(0,1fr) minmax(0,1fr);gap:3px 4px;align-items:center}
 .grid .hd{font-size:10.5px;color:var(--muted);text-align:center}
 .grid .lb{font-size:11.5px;font-weight:700;line-height:1.15}
 .grid .span2{grid-column:2/4}
@@ -50,7 +52,7 @@ form.panel{overflow:auto;display:flex;flex-direction:column;gap:9px}
 .row4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
 .f{display:flex;flex-direction:column;gap:0;font-size:10.5px;color:var(--muted);min-width:0;text-align:center}
 .blk .lb{font-size:11.5px;font-weight:700;margin-bottom:1px}
-input.n{width:100%;font:600 13.7px var(--font);font-variant-numeric:tabular-nums;color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:3px;padding:2px 6px;height:25px;text-align:right}
+input.n,output.n{width:100%;font:600 13.7px var(--font);font-variant-numeric:tabular-nums;color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:3px;padding:2px 6px;height:25px;text-align:right}
 input.n::placeholder{color:var(--ph);font-weight:400}
 input.n:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent);background:#fff}
 .seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
@@ -83,7 +85,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .count .d{font-size:12.1px;font-weight:700}
 .reshead{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px}
 .status{display:inline-flex;align-items:center;gap:4px;font-weight:700;font-size:11px;padding:1px 8px;border-radius:999px;white-space:nowrap}
-.status.ok{color:var(--ok);background:var(--ok-bg)} .status.bad{color:var(--bad);background:var(--bad-bg)} .status.idle{color:var(--muted);background:var(--border-area)}
+.status.ok{color:var(--ok);background:var(--ok-bg)} .status.bad{color:var(--bad);background:var(--bad-bg)} .status.idle{color:var(--muted);background:var(--border-area)} .status.warn{color:var(--warn);background:var(--warn-bg)}
 .status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 table.res{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 table.res th,table.res td{padding:2px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
@@ -95,6 +97,11 @@ table.res tr.key td{color:var(--brand);font-size:15.8px}
 table.res tr.key td:first-child{font-size:11.5px;font-weight:700}
 table.res td small{font-size:10px;color:var(--muted);font-weight:400}
 .neg{color:var(--bad)!important}
+output.n{display:flex;align-items:center;justify-content:flex-end}
+output.calc{background:var(--remain);border-color:var(--remain-line);color:var(--remain-ink)}
+.alert{display:flex;flex-direction:column;gap:1px;margin-top:5px;padding:5px 8px;border-radius:4px;background:var(--bad-bg);color:var(--bad);border-left:3px solid var(--bad);font-size:11px;line-height:1.3}
+.alert b{font-size:12.5px}
+.alert span{color:var(--fg)}
 .note{font-size:11px;color:var(--muted);margin:3px 0 0;line-height:1.3}
 .drawpanel{flex:1;min-height:0;display:flex;flex-direction:column}
 .draw{flex:1;min-height:0;position:relative}
@@ -118,11 +125,11 @@ table.res td small{font-size:10px;color:var(--muted);font-weight:400}
   .panel{padding:12px}
   .panel h2{font-size:13px}
   form.panel{overflow:visible;gap:12px}
-  .grid{grid-template-columns:70px minmax(0,1fr) minmax(0,1fr);gap:6px}
+  .grid{grid-template-columns:96px minmax(0,1fr) minmax(0,1fr);gap:6px}
   .grid .lb,.blk .lb{font-size:14px}
   .grid .hd,.f{font-size:12px}
   .row4{gap:6px}
-  input.n{font-size:16px;height:40px;padding:4px 8px}
+  input.n,output.n{font-size:16px;height:40px;padding:4px 8px}
   .seg label{font-size:14px;padding:9px 2px}
   .count{padding:10px 14px}
   .count .k{font-size:13px} .count .v{font-size:40px} .count .d{font-size:15px}
@@ -135,7 +142,12 @@ table.res td small{font-size:10px;color:var(--muted);font-weight:400}
   table.res td{font-size:15px} table.res td:first-child{font-size:13px}
   table.res tr.key td{font-size:17px} table.res tr.key td:first-child{font-size:13px}
   table.res td small{font-size:11px}
-  .note{font-size:12.5px}
+  output.n{display:flex;align-items:center;justify-content:flex-end}
+output.calc{background:var(--remain);border-color:var(--remain-line);color:var(--remain-ink)}
+.alert{display:flex;flex-direction:column;gap:1px;margin-top:5px;padding:5px 8px;border-radius:4px;background:var(--bad-bg);color:var(--bad);border-left:3px solid var(--bad);font-size:11px;line-height:1.3}
+.alert b{font-size:12.5px}
+.alert span{color:var(--fg)}
+.note{font-size:12.5px}
   .reshead{flex-wrap:wrap}
   .dsub{font-size:12px}
   .draw{flex:none;aspect-ratio:1/1;max-width:100%}
@@ -165,12 +177,18 @@ table.res td small{font-size:10px;color:var(--muted);font-weight:400}
       <h2 data-i18n="inputs">입력 파라메터</h2>
       <div class="grid">
         <span></span><span class="hd">X</span><span class="hd">Y</span>
-        <span class="lb" data-i18n="raw">원자재</span>
+        <span class="lb" data-i18n="raw">원자재 크기</span>
         <input class="n" id="rawX" inputmode="decimal" enterkeyhint="next" placeholder="mm" aria-label="raw X">
         <input class="n" id="rawY" inputmode="decimal" enterkeyhint="next" placeholder="mm" aria-label="raw Y">
-        <span class="lb" data-i18n="prd">완제품</span>
+        <span class="lb" data-i18n="prd">완제품 크기</span>
         <input class="n" id="prdX" inputmode="decimal" enterkeyhint="next" placeholder="mm" aria-label="product X">
         <input class="n" id="prdY" inputmode="decimal" enterkeyhint="next" placeholder="mm" aria-label="product Y">
+        <span class="lb"><span data-i18n="mg">다음 공정 가공 마진</span><br><small class="sub" data-i18n="mgSub">제품 1개당</small></span>
+        <input class="n" id="mX" inputmode="decimal" enterkeyhint="next" placeholder="0" aria-label="margin X">
+        <input class="n" id="mY" inputmode="decimal" enterkeyhint="next" placeholder="0" aria-label="margin Y">
+        <span class="lb"><span data-i18n="pc">재단할 크기</span><br><small class="sub" data-i18n="pcSub">완제품 + 마진</small></span>
+        <output class="n calc" id="pcX">-</output>
+        <output class="n calc" id="pcY">-</output>
         <span class="lb"><span data-i18n="cut">절단 폭</span><br><small class="sub" data-i18n="cutSub">X·Y 공통</small></span>
         <input class="n span2" id="cut" inputmode="decimal" enterkeyhint="next" placeholder="0" aria-label="cut width X,Y">
       </div>
@@ -210,12 +228,11 @@ table.res td small{font-size:10px;color:var(--muted);font-weight:400}
           <table class="res">
             <thead><tr><th></th><th>X</th><th>Y</th></tr></thead>
             <tbody>
-              <tr class="key"><td><span data-i18n="mAvail">다음 공정 사용 가능 마진</span><br><small data-i18n="mAvailSub">제품 1개당 합계</small></td><td id="oMx">-</td><td id="oMy">-</td></tr>
-              <tr><td data-i18n="mHalf">한쪽당 마진 (양쪽 균등)</td><td id="oHx">-</td><td id="oHy">-</td></tr>
-              <tr><td data-i18n="pieces">배치 개수</td><td id="oNx">-</td><td id="oNy">-</td></tr>
-              <tr><td data-i18n="cutSize">절단 치수 (제품 + 마진)</td><td id="oSx">-</td><td id="oSy">-</td></tr>
+              <tr class="key"><td data-i18n="pieces">절단 배치 개수</td><td id="oNx">-</td><td id="oNy">-</td></tr>
+              <tr><td data-i18n="total">생산 가능 제품 수 (합계)</td><td colspan="2" id="oTot">-</td></tr>
             </tbody>
           </table>
+          <div class="alert" id="oWarn" hidden></div>
           <p class="note" id="oNote"></p>
         </div>
       </div>
@@ -224,9 +241,11 @@ table.res td small{font-size:10px;color:var(--muted);font-weight:400}
         <div class="reshead"><h2 style="margin:0" data-i18n="layout">분할 형태</h2><span class="dsub" id="oOri"></span></div>
         <div class="draw" id="draw"></div>
         <div class="legend">
-          <span><i style="background:var(--cell);border-color:var(--prod)"></i><span data-i18n="lgCut">절단 치수 (제품 + 마진)</span></span>
+          <span><i style="background:var(--cell);border-color:var(--prod)"></i><span data-i18n="lgCut">재단할 크기</span></span>
           <span><i style="border:1px dashed var(--prod);background:transparent"></i><span data-i18n="lgPrd">완제품 외곽</span></span>
-          <span><i style="background:var(--border-area)"></i><span data-i18n="lgEdge">테두리 마진 · 잔여</span></span>
+          <span><i style="background:var(--kerf);border-color:var(--kerf)"></i><span data-i18n="lgKerf">절단 폭</span></span>
+          <span><i style="background:var(--remain);border-color:var(--remain-line)"></i><span data-i18n="lgRemain">원자재 잔량</span></span>
+          <span><i style="background:var(--border-area)"></i><span data-i18n="lgEdge">테두리 마진</span></span>
         </div>
       </div>
     </div>
@@ -235,49 +254,56 @@ table.res td small{font-size:10px;color:var(--muted);font-weight:400}
 
 <script>
 // ===== 프로그램 정보 (여기만 고치면 표시가 바뀝니다) =====
-const APP_VERSION = "v1.4.0";
-const APP_DATE    = "2026-11-05";
+const APP_VERSION = "v1.5.0";
+const APP_DATE    = "2026-11-10";
 const APP_AUTHOR  = "Kwag.DS";
-const WIN_W = 936, WIN_H = 720;
 // 기본값 (빈칸 "" = 0으로 계산)
-const DEFAULTS = {rawX:3597, rawY:3297, prdX:1000, prdY:1000, cut:3, bT:3, bB:"", bL:3, bR:""};   // 프로그램 창 크기 (px)
+const DEFAULTS = {rawX:3597, rawY:3297, prdX:1000, prdY:1000, mX:"", mY:"", cut:3, bT:3, bB:"", bL:3, bR:""};
+// 테두리 마진 경고 기준: 이 값 이상인 면이 MIN_SIDES 곳 미만이면 경고
+const BORDER_MIN = 3, MIN_SIDES = 2;
 // ===========================================================
 
 const I18N = {
-  ko:{title:"판재 절단 계산기",ver:"버전",date:"제작일",author:"제작자",inputs:"입력 파라메터",raw:"원자재",prd:"완제품",cut:"절단 폭",
-    border:"테두리 마진 (mm)",top:"상",bottom:"하",left:"좌",right:"우",ori:"배치 방향",cutSub:"X·Y 공통",auto:"자동",normal:"정방향",rot:"90° 회전",
-    reset:"초기화",print:"인쇄",count:"생산 가능 제품 수",pcs:"개",outputs:"출력 파라메터",mAvail:"다음 공정 사용 가능 마진",mAvailSub:"제품 1개당 합계",
-    mHalf:"한쪽당 마진 (양쪽 균등)",pieces:"배치 개수",cutSize:"절단 치수 (제품 + 마진)",layout:"분할 형태",
-    lgCut:"절단 치수 (제품 + 마진)",lgPrd:"완제품 외곽",lgEdge:"테두리 마진 · 잔여",
-    stOk:"가공 가능",stBad:"원자재 부족",stIdle:"입력 대기",
-    noteOk:"다음 공정에서 제품 1개당 X {x}, Y {y} 까지 마진을 사용할 수 있습니다.",
-    noteBad:"원자재가 {s} 부족합니다. 테두리 마진을 줄이거나 배치 방향을 바꿔 보세요.",
-    noteIdle:"원자재와 완제품 치수를 입력하면 바로 계산됩니다. 절단 폭과 테두리 마진은 비워 두면 0입니다.",
-    cmpAuto:"자동 선택 근거",cmpMan:"배치 비교",applied:"적용",na:"불가",short:"{s} 부족",margin:"마진",
-    oriN:"정방향 배치",oriR:"90° 회전 배치",sheet:"원자재",product:"제품",empty:"원자재와 완제품 치수를 입력하면 분할 형태가 그려집니다.",
+  ko:{title:"판재 절단 계산기",ver:"버전",date:"제작일",author:"제작자",inputs:"입력 파라메터",raw:"원자재 크기",prd:"완제품 크기",
+    mg:"다음 공정 가공 마진",mgSub:"제품 1개당",pc:"재단할 크기",pcSub:"완제품 + 마진",cut:"절단 폭",cutSub:"X·Y 공통",
+    border:"테두리 마진 (mm)",top:"상",bottom:"하",left:"좌",right:"우",ori:"배치 방향",auto:"자동",normal:"정방향",rot:"90° 회전",
+    reset:"초기화",print:"인쇄",count:"생산 가능 제품 수",pcs:"개",outputs:"출력 파라메터",pieces:"절단 배치 개수",total:"생산 가능 제품 수 (합계)",
+    layout:"분할 형태",lgCut:"재단할 크기",lgPrd:"완제품 외곽",lgKerf:"절단 폭",lgRemain:"원자재 잔량",lgEdge:"테두리 마진",
+    stOk:"재단 가능",stBad:"원자재 부족",stIdle:"입력 대기",stWarn:"주의",
+    warnBorder:"재단 작업 어려움 및 직각도 위험",
+    warnBorderSub:"테두리 마진 {min} mm 이상인 면이 {n}곳입니다. 상·하·좌·우 중 최소 {req}곳은 {min} mm 이상 필요합니다.",
+    noteOk:"원자재 잔량: X {x}, Y {y} (좌측 하단부터 배치)",
+    noteBad:"재단할 크기가 원자재보다 {s} 큽니다. 마진이나 테두리를 줄이거나 배치 방향을 바꿔 보세요.",
+    noteIdle:"원자재와 완제품 크기를 입력하면 바로 계산됩니다. 마진, 절단 폭, 테두리 마진은 비워 두면 0입니다.",
+    cmpAuto:"자동 선택 근거",cmpMan:"배치 비교",applied:"적용",na:"불가",short:"{s} 부족",remain:"잔량",
+    oriN:"정방향 배치",oriR:"90° 회전 배치",sheet:"원자재",product:"제품",empty:"원자재와 완제품 크기를 입력하면 분할 형태가 그려집니다.",
     maxCells:"{n}개까지만 표시"},
-  en:{title:"Sheet Cutting Calculator",ver:"Version",date:"Date",author:"Author",inputs:"Inputs",raw:"Sheet",prd:"Product",cut:"Cut width",
-    border:"Edge margin (mm)",top:"Top",bottom:"Bottom",left:"Left",right:"Right",ori:"Orientation",cutSub:"X·Y same",auto:"Auto",normal:"Normal",rot:"Rotate 90°",
-    reset:"Reset",print:"Print",count:"Products per sheet",pcs:"pcs",outputs:"Results",mAvail:"Margin for next process",mAvailSub:"total per product",
-    mHalf:"Per side (split evenly)",pieces:"Pieces",cutSize:"Cut size (product + margin)",layout:"Cutting layout",
-    lgCut:"Cut size (product + margin)",lgPrd:"Product outline",lgEdge:"Edge margin · offcut",
-    stOk:"OK",stBad:"Sheet too small",stIdle:"Waiting for input",
-    noteOk:"In the next process each product can take up to X {x} and Y {y} of margin.",
-    noteBad:"The sheet is {s} short. Reduce the edge margin or change the orientation.",
-    noteIdle:"Enter the sheet and product sizes to calculate. A blank cut width or edge margin counts as 0.",
-    cmpAuto:"Why Auto chose this",cmpMan:"Layout comparison",applied:"applied",na:"Does not fit",short:"{s} short",margin:"Margin",
+  en:{title:"Sheet Cutting Calculator",ver:"Version",date:"Date",author:"Author",inputs:"Inputs",raw:"Sheet size",prd:"Product size",
+    mg:"Next-process margin",mgSub:"per product",pc:"Cut size",pcSub:"product + margin",cut:"Cut width",cutSub:"X·Y same",
+    border:"Edge margin (mm)",top:"Top",bottom:"Bottom",left:"Left",right:"Right",ori:"Orientation",auto:"Auto",normal:"Normal",rot:"Rotate 90°",
+    reset:"Reset",print:"Print",count:"Products per sheet",pcs:"pcs",outputs:"Results",pieces:"Pieces per row/column",total:"Products per sheet (total)",
+    layout:"Cutting layout",lgCut:"Cut size",lgPrd:"Product outline",lgKerf:"Cut width",lgRemain:"Remaining sheet",lgEdge:"Edge margin",
+    stOk:"Can be cut",stBad:"Sheet too small",stIdle:"Waiting for input",stWarn:"Caution",
+    warnBorder:"Cutting difficult · squareness risk",
+    warnBorderSub:"{n} side(s) have an edge margin of {min} mm or more. At least {req} of top, bottom, left and right need {min} mm or more.",
+    noteOk:"Remaining sheet: X {x}, Y {y} (laid out from the bottom-left corner)",
+    noteBad:"The cut size is {s} larger than the sheet. Reduce the margin or edge margin, or change the orientation.",
+    noteIdle:"Enter the sheet and product sizes to calculate. A blank margin, cut width or edge margin counts as 0.",
+    cmpAuto:"Why Auto chose this",cmpMan:"Layout comparison",applied:"applied",na:"Does not fit",short:"{s} short",remain:"Left",
     oriN:"Normal layout",oriR:"Rotated 90°",sheet:"Sheet",product:"Product",empty:"The cutting layout appears once the sheet and product sizes are entered.",
     maxCells:"Showing first {n} only"},
-  vi:{title:"Máy tính cắt tấm",ver:"Phiên bản",date:"Ngày tạo",author:"Người tạo",inputs:"Thông số đầu vào",raw:"Phôi tấm",prd:"Sản phẩm",cut:"Bề rộng cắt",
-    border:"Biên mép (mm)",top:"Trên",bottom:"Dưới",left:"Trái",right:"Phải",ori:"Hướng xếp",cutSub:"X·Y chung",auto:"Tự động",normal:"Chuẩn",rot:"Xoay 90°",
-    reset:"Đặt lại",print:"In",count:"Số sản phẩm mỗi tấm",pcs:"cái",outputs:"Kết quả",mAvail:"Dung sai cho công đoạn sau",mAvailSub:"tổng mỗi sản phẩm",
-    mHalf:"Mỗi bên (chia đều)",pieces:"Số lượng xếp",cutSize:"Kích thước cắt (SP + dung sai)",layout:"Sơ đồ cắt",
-    lgCut:"Kích thước cắt (SP + dung sai)",lgPrd:"Đường bao sản phẩm",lgEdge:"Biên mép · phần dư",
-    stOk:"Gia công được",stBad:"Thiếu phôi",stIdle:"Chờ nhập",
-    noteOk:"Ở công đoạn sau, mỗi sản phẩm có thể dùng dung sai tối đa X {x}, Y {y}.",
-    noteBad:"Phôi thiếu {s}. Hãy giảm biên mép hoặc đổi hướng xếp.",
-    noteIdle:"Nhập kích thước phôi và sản phẩm để tính. Bề rộng cắt và biên mép để trống được tính là 0.",
-    cmpAuto:"Cơ sở chọn tự động",cmpMan:"So sánh bố trí",applied:"áp dụng",na:"Không xếp được",short:"thiếu {s}",margin:"Dung sai",
+  vi:{title:"Máy tính cắt tấm",ver:"Phiên bản",date:"Ngày tạo",author:"Người tạo",inputs:"Thông số đầu vào",raw:"Kích thước phôi",prd:"Kích thước SP",
+    mg:"Dung sai gia công sau",mgSub:"mỗi sản phẩm",pc:"Kích thước cắt",pcSub:"SP + dung sai",cut:"Bề rộng cắt",cutSub:"X·Y chung",
+    border:"Biên mép (mm)",top:"Trên",bottom:"Dưới",left:"Trái",right:"Phải",ori:"Hướng xếp",auto:"Tự động",normal:"Chuẩn",rot:"Xoay 90°",
+    reset:"Đặt lại",print:"In",count:"Số sản phẩm mỗi tấm",pcs:"cái",outputs:"Kết quả",pieces:"Số lượng cắt xếp",total:"Số sản phẩm mỗi tấm (tổng)",
+    layout:"Sơ đồ cắt",lgCut:"Kích thước cắt",lgPrd:"Đường bao sản phẩm",lgKerf:"Bề rộng cắt",lgRemain:"Phôi còn lại",lgEdge:"Biên mép",
+    stOk:"Cắt được",stBad:"Thiếu phôi",stIdle:"Chờ nhập",stWarn:"Chú ý",
+    warnBorder:"Khó cắt và nguy cơ sai độ vuông góc",
+    warnBorderSub:"Có {n} cạnh có biên mép từ {min} mm trở lên. Cần ít nhất {req} cạnh (trên, dưới, trái, phải) từ {min} mm trở lên.",
+    noteOk:"Phôi còn lại: X {x}, Y {y} (xếp từ góc dưới bên trái)",
+    noteBad:"Kích thước cắt lớn hơn phôi {s}. Hãy giảm dung sai hoặc biên mép, hoặc đổi hướng xếp.",
+    noteIdle:"Nhập kích thước phôi và sản phẩm để tính. Dung sai, bề rộng cắt và biên mép để trống được tính là 0.",
+    cmpAuto:"Cơ sở chọn tự động",cmpMan:"So sánh bố trí",applied:"áp dụng",na:"Không xếp được",short:"thiếu {s}",remain:"Dư",
     oriN:"Bố trí chuẩn",oriR:"Xoay 90°",sheet:"Phôi",product:"SP",empty:"Sơ đồ cắt sẽ hiện khi nhập kích thước phôi và sản phẩm.",
     maxCells:"Chỉ hiển thị {n} ô đầu"}
 };
@@ -286,7 +312,7 @@ try { const l = localStorage.getItem("baos-cut-lang"); if (I18N[l]) lang = l; } 
 const t = (k, p={}) => (I18N[lang][k] ?? I18N.ko[k]).replace(/\{(\w+)\}/g, (_, n) => p[n]);
 
 const $ = id => document.getElementById(id);
-const IDS = ["rawX","rawY","prdX","prdY","cut","bT","bB","bL","bR"];
+const IDS = ["rawX","rawY","prdX","prdY","mX","mY","cut","bT","bB","bL","bR"];
 
 $("mVer").textContent = APP_VERSION; $("mDate").textContent = APP_DATE; $("mAuthor").textContent = APP_AUTHOR;
 
@@ -296,78 +322,85 @@ const num = id => { const v = parse($(id).value); return isFinite(v) ? v : 0; };
 const r6 = v => Math.round(v*1e6)/1e6;
 const fmt = v => isFinite(v) ? (Math.round(v*100)/100).toLocaleString("en-US", {maximumFractionDigits:2}) : "-";
 const mm = v => fmt(v) + " mm";
-const floor1 = v => Math.floor(r6(v)*10)/10;
 
-function axis(raw, prd, cut, b1, b2){
+// 한 방향: 사용폭 = 원자재 - 테두리2개, 개수 = INT((사용폭+절단폭)/(재단크기+절단폭)), 최소 1
+function axis(raw, pc, cut, b1, b2){
   const avail = raw - b1 - b2;
-  let n = (prd + cut) > 0 ? Math.floor(r6((avail + cut)/(prd + cut))) : 0;
+  let n = (pc + cut) > 0 ? Math.floor(r6((avail + cut)/(pc + cut))) : 0;
   if (n < 1) n = 1;
-  const rem = r6(avail - n*prd - (n-1)*cut);
-  const m = rem / n;
-  return {n, rem, m, mShow: floor1(m)};
+  const rem = r6(avail - n*pc - (n-1)*cut);   // 마지막 재단품 뒤 남는 길이 (음수 = 부족)
+  const net = rem > 0 ? r6(rem - Math.min(cut, rem)) : 0;   // 잔량 분리 절단 후 실제 남는 판재
+  return {n, rem, net, avail};
 }
-function layout(px, py, p){
-  const ax = axis(p.rawX, px, p.cut, p.bL, p.bR);
-  const ay = axis(p.rawY, py, p.cut, p.bT, p.bB);
-  return {px, py, ax, ay, count: ax.n*ay.n, minM: Math.min(ax.m, ay.m)};
+// px,py = 완제품 / qx,qy = 재단할 크기 (배치 방향 기준)
+function layout(px, py, qx, qy, p){
+  const ax = axis(p.rawX, qx, p.cut, p.bL, p.bR);
+  const ay = axis(p.rawY, qy, p.cut, p.bT, p.bB);
+  return {px, py, qx, qy, ax, ay, count: ax.n*ay.n, fit: ax.rem >= 0 && ay.rem >= 0, minR: Math.min(ax.rem, ay.rem)};
 }
 function short(L){
-  const a = []; if (L.ax.m < 0) a.push(`X ${mm(-L.ax.rem)}`); if (L.ay.m < 0) a.push(`Y ${mm(-L.ay.rem)}`);
+  const a = []; if (L.ax.rem < 0) a.push(`X ${mm(-L.ax.rem)}`); if (L.ay.rem < 0) a.push(`Y ${mm(-L.ay.rem)}`);
   return a.join(", ");
 }
 function read(){
   const p = {}; IDS.forEach(k => p[k] = num(k));
   p.ori = document.querySelector("input[name=ori]:checked").value;
+  p.qX = p.prdX + p.mX; p.qY = p.prdY + p.mY;
   return p;
 }
 function calc(p){
-  const N = layout(p.prdX, p.prdY, p), R = layout(p.prdY, p.prdX, p);
+  const N = layout(p.prdX, p.prdY, p.qX, p.qY, p), R = layout(p.prdY, p.prdX, p.qY, p.qX, p);
   let L, rot;
   if (p.ori === "n") { L = N; rot = false; }
   else if (p.ori === "r") { L = R; rot = true; }
   else {
-    // 자동: 원자재 안에 들어가는 배치 우선 → 수량 많은 쪽 → 마진 넉넉한 쪽 → 정방향
-    const fN = N.minM >= 0, fR = R.minM >= 0;
-    const better = (fR && !fN) || (fR === fN && (R.count > N.count || (R.count === N.count && R.minM > N.minM + 1e-9)));
+    // 자동: 원자재 안에 들어가는 배치 우선 → 수량 많은 쪽 → 잔량 넉넉한 쪽 → 정방향
+    const better = (R.fit && !N.fit) || (R.fit === N.fit && (R.count > N.count || (R.count === N.count && R.minR > N.minR + 1e-9)));
     L = better ? R : N; rot = better;
   }
   return {L, rot, N, R};
 }
+function borderSides(p){ return [p.bT, p.bB, p.bL, p.bR].filter(v => v >= BORDER_MIN - 1e-9).length; }
 
-const OUT = ["oMx","oMy","oHx","oHy","oNx","oNy","oSx","oSy"];
 function clearOut(){
   $("oCount").innerHTML = `-<small>${t("pcs")}</small>`; $("oGrid").textContent = "X - × Y -";
-  OUT.forEach(id => { $(id).textContent = "-"; $(id).classList.remove("neg"); });
+  ["oNx","oNy","oTot"].forEach(id => { $(id).textContent = "-"; });
   $("oStatus").className = "status idle"; $("oStatus").textContent = t("stIdle");
-  $("oNote").textContent = t("noteIdle"); $("oOri").textContent = "";
+  $("oNote").textContent = t("noteIdle"); $("oOri").textContent = ""; $("oWarn").hidden = true;
   $("cmp").innerHTML = ""; $("cmp").dataset.h = "";
   $("draw").innerHTML = `<div class="empty">${t("empty")}</div>`;
 }
 
 function render(){
   const p = read();
+  const showPc = (v, base) => base > 0 ? mm(v) : "-";
+  $("pcX").textContent = showPc(p.qX, p.prdX); $("pcY").textContent = showPc(p.qY, p.prdY);
   if (!(p.rawX>0 && p.rawY>0 && p.prdX>0 && p.prdY>0)) { clearOut(); return; }
   const {L, rot, N, R} = calc(p), {ax, ay} = L;
-  const bad = ax.m < 0 || ay.m < 0;
 
   $("oCount").innerHTML = `${fmt(L.count)}<small>${t("pcs")}</small>`;
   $("oGrid").textContent = `X ${fmt(ax.n)} × Y ${fmt(ay.n)}`;
-  const setV = (id, txt, neg) => { $(id).textContent = txt; $(id).classList.toggle("neg", !!neg); };
-  setV("oMx", mm(ax.mShow), ax.m < 0); setV("oMy", mm(ay.mShow), ay.m < 0);
-  setV("oHx", mm(floor1(ax.m/2)), ax.m < 0); setV("oHy", mm(floor1(ay.m/2)), ay.m < 0);
-  setV("oNx", fmt(ax.n)); setV("oNy", fmt(ay.n));
-  setV("oSx", mm(L.px + ax.mShow), ax.m < 0); setV("oSy", mm(L.py + ay.mShow), ay.m < 0);
+  $("oNx").textContent = fmt(ax.n); $("oNy").textContent = fmt(ay.n);
+  $("oTot").textContent = `${fmt(L.count)} ${t("pcs")}`;
+
+  // 테두리 마진 경고
+  const sides = borderSides(p), warn = sides < MIN_SIDES;
+  $("oWarn").hidden = !warn;
+  if (warn) $("oWarn").innerHTML = `<b>⚠ ${t("warnBorder")}</b><span>${t("warnBorderSub", {n: sides, req: MIN_SIDES, min: BORDER_MIN})}</span>`;
 
   const st = $("oStatus");
-  if (bad){ st.className = "status bad"; st.textContent = t("stBad"); $("oNote").textContent = t("noteBad", {s: short(L)}); }
-  else { st.className = "status ok"; st.textContent = t("stOk"); $("oNote").textContent = t("noteOk", {x: mm(ax.mShow), y: mm(ay.mShow)}); }
+  if (!L.fit){ st.className = "status bad"; st.textContent = t("stBad"); $("oNote").textContent = t("noteBad", {s: short(L)}); }
+  else {
+    st.className = warn ? "status warn" : "status ok"; st.textContent = warn ? t("stWarn") : t("stOk");
+    $("oNote").textContent = t("noteOk", {x: mm(ax.net), y: mm(ay.net)});
+  }
   $("oOri").textContent = `${rot ? t("oriR") : t("oriN")} · ${t("sheet")} ${fmt(p.rawX)} × ${fmt(p.rawY)} mm`;
 
   const card = (key, lay, label) => {
-    const ok = lay.ax.m >= 0 && lay.ay.m >= 0, sel = (key === "r") === rot;
-    const detail = ok ? `X ${fmt(lay.ax.mShow)} · Y ${fmt(lay.ay.mShow)} mm` : t("short", {s: short(lay)});
-    return `<button type="button" class="cc${sel ? " sel" : ""}${ok ? "" : " no"}" data-ori="${key}">
-      <span class="cl">${label}${sel ? " · " + t("applied") : ""}</span><span class="cn">${ok ? fmt(lay.count) + " " + t("pcs") : t("na")}</span><span class="cd">${detail}</span></button>`;
+    const sel = (key === "r") === rot;
+    const detail = lay.fit ? `${t("remain")} X ${fmt(lay.ax.net)} · Y ${fmt(lay.ay.net)} mm` : t("short", {s: short(lay)});
+    return `<button type="button" class="cc${sel ? " sel" : ""}${lay.fit ? "" : " no"}" data-ori="${key}">
+      <span class="cl">${label}${sel ? " · " + t("applied") : ""}</span><span class="cn">${lay.fit ? fmt(lay.count) + " " + t("pcs") : t("na")}</span><span class="cd">${detail}</span></button>`;
   };
   const h = `<div class="ch">${p.ori === "auto" ? t("cmpAuto") : t("cmpMan")}</div>` + card("n", N, t("normal")) + card("r", R, t("rot"));
   if ($("cmp").dataset.h !== h){ $("cmp").innerHTML = h; $("cmp").dataset.h = h; }
@@ -375,34 +408,64 @@ function render(){
   draw(p, L);
 }
 
+// 분할 형태: 원자재 좌측 하단을 기준으로 배치
 function draw(p, L){
-  const W = p.rawX, H = p.rawY, {ax, ay} = L;
-  const cw = L.px + ax.m, ch = L.py + ay.m;
+  const W = p.rawX, H = p.rawY, {ax, ay} = L, cut = p.cut;
+  const qw = L.qx, qh = L.qy;
   const M = Math.max(W, H), box = $("draw").getBoundingClientRect();
   // 도면 글자를 화면 기준 약 12px로 유지
   const upp = (box.width > 0 && box.height > 0) ? Math.max(W/(box.width*0.82), H/(box.height*0.78)) : M/400;
   const fs = 12.5 * upp, pad = fs * 3.4;
   const vx = -pad, vy = -pad, vw = W + pad*1.8, vh = H + pad*1.9;
   const hs = M/60, total = ax.n * ay.n, maxCells = 3000;
+  const x0 = p.bL, yB = H - p.bB;                 // 배치 기준점 (좌측 하단)
+  const uw = W - p.bL - p.bR, uh = H - p.bT - p.bB;
   let s = `<svg viewBox="${vx} ${vy} ${vw} ${vh}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("layout")}">
   <defs><pattern id="hatch" width="${hs}" height="${hs}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
     <rect width="${hs}" height="${hs}" fill="var(--cell)"/><line x1="0" y1="0" x2="0" y2="${hs}" stroke="var(--hatch)" stroke-width="1" vector-effect="non-scaling-stroke"/></pattern></defs>
   <style>text{font-family:var(--font);fill:var(--muted)} .ns{vector-effect:non-scaling-stroke}</style>
   <rect x="0" y="0" width="${W}" height="${H}" fill="var(--border-area)" stroke="var(--fg)" stroke-width="1.5" class="ns"/>`;
-  const uw = W - p.bL - p.bR, uh = H - p.bT - p.bB;
-  if (uw > 0 && uh > 0) s += `<rect x="${p.bL}" y="${p.bT}" width="${uw}" height="${uh}" fill="var(--sheet)" stroke="var(--muted)" stroke-dasharray="4 3" stroke-width="1" class="ns"/>`;
-  const bad = ax.m < 0 || ay.m < 0;
-  const showLabel = cw > fs*3.2 && ch > fs*2.6 && total <= 200;
+  // 사용 영역 = 기본 잔량색 (재단품·절단 폭이 덮지 않은 부분이 잔량)
+  if (uw > 0 && uh > 0) s += `<rect x="${x0}" y="${p.bT}" width="${uw}" height="${uh}" fill="var(--remain)" stroke="var(--remain-line)" stroke-dasharray="4 3" stroke-width="1" class="ns"/>`;
+
+  const blockW = ax.n*qw + (ax.n-1)*cut, blockH = ay.n*qh + (ay.n-1)*cut;
+  const kerf = (x, y, w, h) => (w > 0 && h > 0) ? `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--kerf)" stroke="var(--kerf)" stroke-width="1" class="ns"/>` : "";
+  if (L.fit && cut > 0){
+    // 열 사이 절단 (+ 우측 잔량 분리 절단)
+    for (let i = 0; i < ax.n; i++){
+      const kx = x0 + (i+1)*qw + i*cut, last = i === ax.n - 1;
+      const w = last ? Math.min(cut, ax.rem) : cut;
+      s += kerf(kx, yB - blockH, w, blockH);
+    }
+    // 행 사이 절단 (+ 상단 잔량 분리 절단, 사용 영역 전체 폭)
+    for (let j = 0; j < ay.n; j++){
+      const last = j === ay.n - 1, h = last ? Math.min(cut, ay.rem) : cut;
+      const ky = yB - (j+1)*qh - j*cut - h;
+      s += kerf(x0, ky, last ? uw : blockW, h);
+    }
+  }
+  const showLabel = qw > fs*3.2 && qh > fs*2.6 && total <= 200;
   let k = 0;
   for (let j=0; j<ay.n && k<maxCells; j++) for (let i=0; i<ax.n && k<maxCells; i++, k++){
-    const x = p.bL + i*(cw + p.cut), y = p.bT + j*(ch + p.cut);
-    s += `<rect x="${x}" y="${y}" width="${cw}" height="${ch}" fill="url(#hatch)" stroke="${bad ? "var(--bad)" : "var(--prod)"}" stroke-width="1.2" class="ns"/>`;
-    const ox = x + Math.max(0, ax.m)/2, oy = y + Math.max(0, ay.m)/2;
-    if (ax.m > 0 || ay.m > 0) s += `<rect x="${ox}" y="${oy}" width="${L.px}" height="${L.py}" fill="none" stroke="var(--prod)" stroke-dasharray="5 3" stroke-width="1" class="ns"/>`;
+    const x = x0 + i*(qw + cut), y = yB - (j+1)*qh - j*cut;
+    s += `<rect x="${x}" y="${y}" width="${qw}" height="${qh}" fill="url(#hatch)" stroke="${L.fit ? "var(--prod)" : "var(--bad)"}" stroke-width="1.2" class="ns"/>`;
+    const mx = qw - L.px, my = qh - L.py;
+    if (mx > 0 || my > 0) s += `<rect x="${x + mx/2}" y="${y + my/2}" width="${L.px}" height="${L.py}" fill="none" stroke="var(--prod)" stroke-dasharray="5 3" stroke-width="1" class="ns"/>`;
     if (showLabel){
-      s += `<text x="${x+cw/2}" y="${y+ch/2}" text-anchor="middle" font-size="${fs*1.05}" style="fill:var(--fg);font-weight:700">${t("product")}</text>`;
-      s += `<text x="${x+cw/2}" y="${y+ch/2+fs*1.2}" text-anchor="middle" font-size="${fs*0.8}">${fmt(L.px)} × ${fmt(L.py)}</text>`;
+      s += `<text x="${x+qw/2}" y="${y+qh/2}" text-anchor="middle" font-size="${fs*1.05}" style="fill:var(--fg);font-weight:700">${t("product")}</text>`;
+      s += `<text x="${x+qw/2}" y="${y+qh/2+fs*1.2}" text-anchor="middle" font-size="${fs*0.8}">${fmt(L.px)} × ${fmt(L.py)}</text>`;
     }
+  }
+  // 잔량 표시
+  if (L.fit){
+    const rx = ax.net, ry = ay.net;
+    const lab = (cx, cy, w, h, v, vert) => {
+      if (Math.min(w, h) < fs*1.4 || Math.max(w, h) < fs*6) return "";
+      const tr = vert ? ` transform="rotate(-90 ${cx} ${cy})"` : "";
+      return `<text x="${cx}" y="${cy + fs*0.35}" text-anchor="middle" font-size="${fs*0.9}" style="fill:var(--remain-ink);font-weight:700"${tr}>${t("lgRemain")} ${fmt(v)}</text>`;
+    };
+    s += lab(x0 + blockW + Math.min(cut, ax.rem) + rx/2, yB - blockH/2, rx, blockH, rx, rx < blockH);
+    s += lab(x0 + uw/2, p.bT + ry/2, uw, ry, ry, false);
   }
   const tick = fs*0.45;
   const dimH = (x1,x2,y,label,col) => `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width="1" class="ns"/>
@@ -415,8 +478,8 @@ function draw(p, L){
     <text x="${tx}" y="${(y1+y2)/2}" text-anchor="middle" font-size="${fs}" transform="rotate(-90 ${tx} ${(y1+y2)/2})" style="fill:${col}">${label}</text>`; };
   s += dimH(0, W, H + pad*0.75, `${t("sheet")} X ${fmt(W)}`, "var(--dim)");
   s += dimV(0, H, -pad*0.55, `${t("sheet")} Y ${fmt(H)}`, "var(--dim)");
-  s += dimH(p.bL, p.bL + cw, -pad*0.35, fmt(L.px + ax.mShow), "var(--cut)");
-  s += dimV(p.bT, p.bT + ch, W + pad*0.3, fmt(L.py + ay.mShow), "var(--cut)", 1);
+  s += dimH(x0, x0 + qw, -pad*0.35, fmt(qw), "var(--cut)");
+  s += dimV(yB - qh, yB, W + pad*0.3, fmt(qh), "var(--cut)", 1);
   if (total > maxCells) s += `<text x="${W/2}" y="${H/2}" text-anchor="middle" font-size="${fs*1.4}" style="fill:var(--fg)">${t("maxCells", {n: fmt(maxCells)})}</text>`;
   $("draw").innerHTML = s + `</svg>`;
 }
@@ -461,13 +524,6 @@ applyLang();
 // 웹 앱(홈 화면 설치)일 때 오프라인 캐시 등록
 if ("serviceWorker" in navigator && location.protocol === "https:" && document.querySelector('link[rel="manifest"]')){
   navigator.serviceWorker.register("sw.js").catch(() => {});
-}
-// 단독 실행(EXE) 시 창 크기 고정 + 화면 가운데 배치
-if (window.self === window.top && location.protocol === "file:"){
-  try {
-    window.resizeTo(WIN_W, WIN_H);
-    window.moveTo(Math.max(0, (screen.availWidth - WIN_W)/2), Math.max(0, (screen.availHeight - WIN_H)/2));
-  } catch(e){}
 }
 </script>
 

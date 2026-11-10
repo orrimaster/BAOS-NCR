@@ -1,6 +1,6 @@
 // BAOS 판재 절단 계산기 - 오프라인 캐시
 // 화면을 수정해서 다시 올릴 때는 아래 버전 문자열을 바꿔 주세요.
-const CACHE = "baos-cut-v1.4.0";
+const CACHE = "baos-cut-v1.5.0";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
